@@ -3,7 +3,7 @@
 //  TODOList
 //
 //  Created by Dmitry Karpinsky on 05.05.2021.
-//  added main view controller, detail view controller, segue to dvc and unwind segue, custom cell for table view, custom placeholder text view, editting style for main view controller 
+//  added main view controller, detail view controller, segue to dvc and unwind segue, custom cell for table view, custom placeholder text view, editting style for main view controller
 
 import UIKit
 import CoreData
@@ -18,7 +18,7 @@ class TasksTableViewController: UITableViewController {
         
         setBarButtonStye()
         showCountAvailableTask()
-        tasks = getTasksFromStore()
+        getTasksFromStore()
         
     }
     
@@ -34,18 +34,16 @@ class TasksTableViewController: UITableViewController {
         }
     }
     
-    private func getTasksFromStore() -> [Task] {
+    private func getTasksFromStore() {
         
-        var result = [Task]()
         let fetchRequest : NSFetchRequest<Task> = Task.fetchRequest()
         fetchRequest.predicate = NSPredicate(format: "title != nil")
         
         do {
-            result = try context.fetch(fetchRequest)
+            tasks = try context.fetch(fetchRequest)
         } catch let error as NSError {
             print(error.localizedDescription)
         }
-        return result
     }
     
     private func deleteTaskFormeStore(index: Int) {
@@ -76,8 +74,11 @@ class TasksTableViewController: UITableViewController {
         
         let fetchTask: NSFetchRequest<Task> = Task.fetchRequest()
         let title = tasks[index].title!
-        print("Ищем задачу \(task.title)")
-        fetchTask.predicate = NSPredicate(format: "title = %@", title as String)
+        let dateCreatedTask = task.dateCreate
+        print("Ищем задачу \(title)")
+        print("Ищем время создания \(dateCreatedTask!)")
+        fetchTask.predicate = NSPredicate(format: "date == %@", dateCreatedTask! as NSDate)
+        
         let result = try! context.fetch(fetchTask)
         
         if result.count != 0 {
@@ -228,8 +229,9 @@ class TasksTableViewController: UITableViewController {
             let titleNewTask = vc.titleTask.text!
             let descriptionNewTask = vc.descriptionTask.text! != "Введите описание" ? vc.descriptionTask.text! : ""
             let isDoneNewTask = vc.isDoneButton.isOn
+            let dateCreateNewTask = vc.currentTask?.date ?? Date()
             
-            let newTask = TaskStruct(title: titleNewTask, description: descriptionNewTask, isDone: isDoneNewTask)
+            let newTask = TaskStruct(title: titleNewTask, description: descriptionNewTask, isDone: isDoneNewTask, dateCreate: dateCreateNewTask)
             
             if vc.title == "Новая задача" {
                 addTaskInStore(task: newTask)

@@ -11,4 +11,5 @@ struct TaskStruct {
     var title : String
     var description : String?
     var isDone : Bool
+    var dateCreate : Date!
 }
